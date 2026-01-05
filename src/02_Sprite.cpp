@@ -7,7 +7,7 @@ int main()
 
     // Cargar la imagen desde un archivo
     sf::Texture texture;
-    if (!texture.loadFromFile("assets/images/pikachu.png"))
+    if (!texture.loadFromFile("assets/images/sprite.png"))
     {
         // Manejo de error si no se puede cargar la imagen
         return -1;
@@ -49,5 +49,6 @@ int main()
         window.display();
     }
 
-    return 0;
-}
+/* Archived example: 02_Sprite.cpp
+   Replaced during cleanup. Main Tetris is in src/tetris.cpp
+*/

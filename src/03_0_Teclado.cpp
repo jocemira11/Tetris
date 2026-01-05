@@ -53,5 +53,6 @@ int main() {
         window.display();
     }
 
-    return 0;
-}
+    /* Archived example: 03_0_Teclado.cpp
+       Replaced during cleanup. Main Tetris is in src/tetris.cpp
+    */

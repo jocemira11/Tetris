@@ -1,3 +1,27 @@
+Tetris (Minimal)
+=================
+
+Este repositorio ahora contiene una versión mínima jugable del Tetris clásico usando SFML.
+
+Compilar y ejecutar:
+
+```powershell
+make run
+```
+
+Controles:
+- Izquierda / Derecha: mover pieza
+- Arriba: rotar
+- Abajo: mantener para "soft drop"
+- Espacio: hard drop
+- Esc: salir
+
+El juego inicia con un menú que explica los controles y un botón "PLAY" para comenzar.
+Al terminar, aparece "GAME OVER" con un botón "RESTART" para reiniciar.
+
+Archivos de ejemplo movidos a `archive_examples/` para mantener el historial.
+
+Si quieres que archive los ejemplos en `src/` o restaure alguno, dímelo.
 # EjemplosJuego
 
 El proyecto esta desarrollado sobre MinGW64 utilizando Msys2
