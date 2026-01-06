@@ -19,9 +19,13 @@ Controles:
 El juego inicia con un menú que explica los controles y un botón "PLAY" para comenzar.
 Al terminar, aparece "GAME OVER" con un botón "RESTART" para reiniciar.
 
-Archivos de ejemplo movidos a `archive_examples/` para mantener el historial.
+Piezas especiales aparecen cada 8 piezas normales:
+- Frozen piece (azul cielo): Al colocarse, detiene el tiempo por 3 segundos.
+- Electrical piece (amarillo): Al colocarse, elimina todas las piezas del mismo color.
+- Fire piece (rojo): Al completar una línea con ella, explota y elimina bloques alrededor.
+- Ghost piece (blanco): Muestra una sombra semi-transparente de donde aterrizaría la pieza.
 
-Si quieres que archive los ejemplos en `src/` o restaure alguno, dímelo.
+Archivos de ejemplo movidos a `archive_examples/` para mantener el historial.
 # EjemplosJuego
 
 El proyecto esta desarrollado sobre MinGW64 utilizando Msys2
