@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <vector>
 #include <string>
 #include <cstdlib>
@@ -83,6 +84,13 @@ int main()
     std::vector<sf::Vector2f> stars;
     for (int i = 0; i < 50; i++) {
         stars.push_back(sf::Vector2f(rand() % screenWidth, rand() % screenHeight));
+    }
+
+    // Background music
+    sf::Music music;
+    if (music.openFromFile("assets/music/space.ogg")) {
+        music.setLoop(true);
+        music.play();
     }
 
     // block rectangles
