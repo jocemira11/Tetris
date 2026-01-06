@@ -3,6 +3,7 @@
 #include <string>
 #include <cstdlib>
 #include <iostream>
+#include <algorithm>
 
 // Classic Tetris minimal implementation
 
@@ -11,6 +12,12 @@ struct Piece {
     int rotation;
     int x;
     int y;
+};
+
+struct Effect {
+    sf::Vector2f pos;
+    sf::Color color;
+    float life;
 };
 
 enum GameState { MENU, PLAYING, GAME_OVER };
@@ -139,6 +146,7 @@ int main()
     float speed = 0.5f;
     float speedCounter = 0.0f;
     bool isPaused = false;
+    std::vector<Effect> effects;
 
     // Special pieces
     int pieceCounter = 0;
@@ -169,6 +177,7 @@ int main()
         isFrozen = false;
         freezeTimer = 0.0f;
         isPaused = false;
+        effects.clear();
         state = PLAYING;
     };
 
@@ -216,6 +225,12 @@ int main()
                 isFrozen = false;
             }
         }
+
+        // Update effects
+        for (auto& e : effects) {
+            e.life -= deltaTime;
+        }
+        effects.erase(std::remove_if(effects.begin(), effects.end(), [](const Effect& e) { return e.life <= 0; }), effects.end());
 
         // Calculate ghost shadow
         if (state == PLAYING && currentPiece.type == 10) { // Ghost
@@ -288,12 +303,20 @@ int main()
                             field[row1 * fieldWidth + x] = 0;
                         }
                         score += 100; // Points for clearing a row
+                        // Add spark effects
+                        for (int x = 0; x < fieldWidth; x++) {
+                            effects.push_back({{x * blockSize + offsetX + blockSize / 2, row1 * blockSize + offsetY + blockSize / 2}, sf::Color::Yellow, 0.5f});
+                        }
                     }
                     if (row2 >= 0 && row2 < fieldHeight) {
                         for (int x = 0; x < fieldWidth; x++) {
                             field[row2 * fieldWidth + x] = 0;
                         }
                         score += 100; // Points for clearing a row
+                        // Add spark effects
+                        for (int x = 0; x < fieldWidth; x++) {
+                            effects.push_back({{x * blockSize + offsetX + blockSize / 2, row2 * blockSize + offsetY + blockSize / 2}, sf::Color::Yellow, 0.5f});
+                        }
                     }
                 } else if (currentPiece.type == 9) { // Fire
                     // Explode blocks around the piece
@@ -305,6 +328,8 @@ int main()
                             if (nx >= 0 && nx < fieldWidth && ny >= 0 && ny < fieldHeight && field[ny * fieldWidth + nx] != 0) {
                                 field[ny * fieldWidth + nx] = 0;
                                 blocksCleared++;
+                                // Add fire effects
+                                effects.push_back({{nx * blockSize + offsetX + blockSize / 2, ny * blockSize + offsetY + blockSize / 2}, sf::Color::Red, 0.5f});
                             }
                         }
                     }
@@ -331,7 +356,12 @@ int main()
                             }
                             score += 100;
                             linesCleared++;
-                    }
+                            level = linesCleared / 10 + 1;
+                            speed = 0.5f / (level * 0.5f + 0.5f);
+                            // Add line clear effects
+                            for (int x = 0; x < fieldWidth; x++) {
+                                effects.push_back({{x * blockSize + offsetX + blockSize / 2, y * blockSize + offsetY + blockSize / 2}, sf::Color::White, 0.5f});
+                            }                    }
                 }            }
                 // Next piece
                 pieceCounter++;
@@ -440,6 +470,14 @@ int main()
                     pausedText.setFillColor(sf::Color::Yellow);
                     window.draw(pausedText);
                 }
+            }
+
+            // Draw effects
+            for (const auto& e : effects) {
+                sf::CircleShape c(3);
+                c.setPosition(e.pos - sf::Vector2f(3, 3));
+                c.setFillColor(e.color);
+                window.draw(c);
             }
 
             // Draw border
