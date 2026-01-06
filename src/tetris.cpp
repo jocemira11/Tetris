@@ -72,6 +72,12 @@ int main()
     sf::RenderWindow window(sf::VideoMode(screenWidth, screenHeight), "Tetris");
     window.setFramerateLimit(60);
 
+    // Stars for space background
+    std::vector<sf::Vector2f> stars;
+    for (int i = 0; i < 50; i++) {
+        stars.push_back(sf::Vector2f(rand() % screenWidth, rand() % screenHeight));
+    }
+
     // block rectangles
     sf::RectangleShape block(sf::Vector2f(blockSize - 1, blockSize - 1));
 
@@ -100,8 +106,8 @@ int main()
 
     // Button for menu and game over
     sf::RectangleShape button(sf::Vector2f(100, 40));
-    button.setFillColor(sf::Color::Green);
-    button.setOutlineColor(sf::Color::White);
+    button.setFillColor(sf::Color(0, 100, 200)); // Blue
+    button.setOutlineColor(sf::Color::Cyan);
     button.setOutlineThickness(2);
 
     sf::Text buttonText;
@@ -113,8 +119,8 @@ int main()
 
     // Pause button
     sf::RectangleShape pauseButton(sf::Vector2f(80, 30));
-    pauseButton.setFillColor(sf::Color::Blue);
-    pauseButton.setOutlineColor(sf::Color::White);
+    pauseButton.setFillColor(sf::Color(0, 150, 255)); // Light blue
+    pauseButton.setOutlineColor(sf::Color::Cyan);
     pauseButton.setOutlineThickness(2);
 
     sf::Text pauseText;
@@ -274,23 +280,44 @@ int main()
                     isFrozen = true;
                     freezeTimer = freezeDuration;
                 } else if (currentPiece.type == 8) { // Electrical
-                    int targetColor = currentPiece.type + 1;
-                    for (int i = 0; i < (int)field.size(); i++) {
-                        if (field[i] == targetColor) {
-                            field[i] = 0;
+                    // Clear two rows where the piece landed
+                    int row1 = currentPiece.y;
+                    int row2 = currentPiece.y - 1;
+                    if (row1 >= 0 && row1 < fieldHeight) {
+                        for (int x = 0; x < fieldWidth; x++) {
+                            field[row1 * fieldWidth + x] = 0;
+                        }
+                        score += 100; // Points for clearing a row
+                    }
+                    if (row2 >= 0 && row2 < fieldHeight) {
+                        for (int x = 0; x < fieldWidth; x++) {
+                            field[row2 * fieldWidth + x] = 0;
+                        }
+                        score += 100; // Points for clearing a row
+                    }
+                } else if (currentPiece.type == 9) { // Fire
+                    // Explode blocks around the piece
+                    int blocksCleared = 0;
+                    for (int ex = -2; ex <= 2; ex++) {
+                        for (int ey = -2; ey <= 2; ey++) {
+                            int nx = currentPiece.x + ex;
+                            int ny = currentPiece.y + ey;
+                            if (nx >= 0 && nx < fieldWidth && ny >= 0 && ny < fieldHeight && field[ny * fieldWidth + nx] != 0) {
+                                field[ny * fieldWidth + nx] = 0;
+                                blocksCleared++;
+                            }
                         }
                     }
-                } // Fire and Ghost effects handled elsewhere
+                    score += blocksCleared * 10; // Points for each block cleared
+                }
 
                 // Check lines
                 for (int py = 0; py < 4; py++) {
                     int y = currentPiece.y + py;
                     if (y >= 0 && y < fieldHeight) {
                         bool line = true;
-                        bool hasFire = false;
                         for (int x = 0; x < fieldWidth; x++) {
                             if (field[y * fieldWidth + x] == 0) { line = false; break; }
-                            if (field[y * fieldWidth + x] == 10) hasFire = true; // Fire piece
                         }
                         if (line) {
                             // remove line
@@ -304,23 +331,8 @@ int main()
                             }
                             score += 100;
                             linesCleared++;
-
-                            // Fire explosion
-                            if (hasFire) {
-                                for (int ex = -2; ex <= 2; ex++) {
-                                    for (int ey = -2; ey <= 2; ey++) {
-                                        int nx = currentPiece.x + ex;
-                                        int ny = y + ey;
-                                        if (nx >= 0 && nx < fieldWidth && ny >= 0 && ny < fieldHeight) {
-                                            field[ny * fieldWidth + nx] = 0;
-                                        }
-                                    }
-                                }
-                            }
-                        }
                     }
-                }
-
+                }            }
                 // Next piece
                 pieceCounter++;
                 if (pieceCounter % 3 == 0) {
@@ -340,18 +352,26 @@ int main()
         }
 
         // Render
-        window.clear(sf::Color(50, 50, 50));
+        window.clear(sf::Color(0, 0, 20)); // Dark blue space background
+
+        // Draw stars
+        for (auto& star : stars) {
+            sf::CircleShape s(1);
+            s.setPosition(star);
+            s.setFillColor(sf::Color::White);
+            window.draw(s);
+        }
 
         if (state == MENU) {
             if (fontLoaded) {
                 sf::Text title("TETRIS", font, 40);
                 title.setPosition(100, 80);
-                title.setFillColor(sf::Color::White);
+                title.setFillColor(sf::Color::Cyan);
                 window.draw(title);
 
                 sf::Text controls("Controls:\nA/D or Left/Right: Move\nS or Down: Soft Drop\nW or Up: Rotate\nSpace: Hard Drop\nP: Pause\n\nSpecial Pieces:\nFrozen (Magenta): Freezes time briefly\nElectrical (Yellow): Clears random lines\nFire (Red): Explodes nearby blocks\nGhost (Green): Passes through blocks", font, 20);
                 controls.setPosition(20, 180);
-                controls.setFillColor(sf::Color::White);
+                controls.setFillColor(sf::Color(200, 200, 255)); // Light blue
                 window.draw(controls);
 
                 button.setPosition(150, 450);
